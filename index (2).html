@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Plan 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f; --surface: #141416; --surface2: #1c1c20;
+    --border: #2a2a30; --text: #f0f0f4; --muted: #6b6b78;
+    --accent: #e8f54e; --wip: #f5a623;
+
+    --english:   #ffd76b; --english-bg:   rgba(255,215,107,0.08);
+    --physics:   #6bffd7; --physics-bg:   rgba(107,255,215,0.08);
+    --biology:   #ff9f6b; --biology-bg:   rgba(255,159,107,0.08);
+    --chemistry: #ff6b9f; --chemistry-bg: rgba(255,107,159,0.08);
+    --maths:     #b06bff; --maths-bg:     rgba(176,107,255,0.08);
+    --cs:        #6bbfff; --cs-bg:        rgba(107,191,255,0.08);
+    --appliedm:  #a8ff6b; --appliedm-bg:  rgba(168,255,107,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; overflow-x: hidden; }
+
+  /* ── HEADER ── */
+  header {
+    padding: 1.4rem 2rem 1rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg); backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .header-left h1 { font-family: 'Syne', sans-serif; font-size: clamp(1.3rem,4vw,2.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .header-left h1 span { color: var(--accent); }
+  .header-sub { font-size: 0.62rem; color: var(--muted); margin-top: 0.25rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .hc { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+
+  .btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    padding: 0.4rem 0.8rem; cursor: pointer; border-radius: 4px;
+    letter-spacing: 0.05em; transition: all 0.15s; text-transform: uppercase; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.on { background: var(--accent); color: #0d0d0f; border-color: var(--accent); font-weight: 700; }
+  .btn.swap-on { background: rgba(245,166,35,0.15); border-color: var(--wip); color: var(--wip); }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; gap: 0.4rem; padding: 0.65rem 2rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); align-items: center; }
+  .ll { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.2rem; }
+  .li {
+    display: flex; align-items: center; gap: 0.3rem; font-size: 0.6rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--muted); cursor: pointer; padding: 0.16rem 0.38rem;
+    border-radius: 3px; transition: all 0.15s; border: 1px solid transparent;
+  }
+  .li:hover { color: var(--text); }
+  .li.on { color: var(--text); border-color: var(--border); background: var(--surface2); }
+  .ldot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── STATUS KEY ── */
+  .status-bar {
+    display: flex; gap: 1.2rem; padding: 0.45rem 2rem; border-bottom: 1px solid var(--border);
+    font-size: 0.58rem; color: var(--muted); align-items: center; flex-wrap: wrap;
+  }
+  .si { display: flex; align-items: center; gap: 0.3rem; }
+  .spip { width: 7px; height: 7px; border-radius: 2px; }
+  .sb-right { margin-left: auto; color: var(--wip); font-size: 0.58rem; }
+
+  /* ── PROGRESS ── */
+  .prog-wrap { padding: 0.6rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+  .prog-lbl { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+  .prog-track { flex: 1; height: 3px; background: var(--surface2); border-radius: 2px; position: relative; overflow: hidden; }
+  .pbar { position: absolute; top: 0; height: 100%; border-radius: 2px; transition: width 0.4s, left 0.4s; }
+  .pb-done { background: var(--accent); left: 0; }
+  .pb-wip  { background: var(--wip); }
+  .pcnt-done { font-size: 0.66rem; color: var(--accent); font-family:'Syne',sans-serif; font-weight:700; white-space:nowrap; }
+  .pcnt-wip  { font-size: 0.66rem; color: var(--wip);    font-family:'Syne',sans-serif; font-weight:700; white-space:nowrap; }
+
+  /* ── WEEK TABS ── */
+  .wtabs { display:flex; padding: 0 2rem; border-bottom: 1px solid var(--border); overflow-x:auto; }
+  .wt {
+    font-family:'Syne',sans-serif; font-size:0.74rem; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase; padding:0.78rem 1.3rem;
+    cursor:pointer; color:var(--muted); border-bottom:2px solid transparent;
+    transition:all 0.15s; white-space:nowrap;
+    background:none; border-top:none; border-left:none; border-right:none;
+  }
+  .wt:hover { color:var(--text); }
+  .wt.on { color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* ── MAIN ── */
+  .main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+  .week-hdr { display:flex; align-items:baseline; gap:1rem; margin-bottom:1.1rem; }
+  .wk-title { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; letter-spacing:-0.04em; }
+  .wk-range { font-size:0.65rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase; }
+
+  /* ── GRID ── */
+  .days-grid {
+    display:grid; grid-template-columns:repeat(7,1fr);
+    gap:1px; background:var(--border); border:1px solid var(--border); border-radius:8px; overflow:hidden;
+  }
+  @media(max-width:1100px){ .days-grid{grid-template-columns:repeat(4,1fr);} }
+  @media(max-width:700px) { .days-grid{grid-template-columns:repeat(2,1fr);} }
+
+  /* ── DAY CARD ── */
+  .day-card {
+    background:var(--surface); padding:0.85rem;
+    display:flex; flex-direction:column; gap:0.32rem;
+    min-height:260px; position:relative;
+  }
+  .day-card.today { background:#181820; }
+  .today-badge {
+    position:absolute; top:0.42rem; right:0.42rem;
+    font-size:0.48rem; letter-spacing:0.1em; text-transform:uppercase;
+    background:var(--accent); color:#0d0d0f;
+    padding:0.1rem 0.28rem; border-radius:2px; font-weight:700; font-family:'Syne',sans-serif;
+  }
+  .dname { font-family:'Syne',sans-serif; font-size:0.56rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); }
+  .ddate { font-family:'Syne',sans-serif; font-size:1.25rem; font-weight:800; letter-spacing:-0.04em; line-height:1; margin-bottom:0.12rem; }
+  .day-card.today .ddate { color:var(--accent); }
+  .day-btn {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:0.48rem; padding:0.1rem 0.32rem;
+    cursor:pointer; border-radius:3px; letter-spacing:0.04em; text-transform:uppercase;
+    transition:all 0.12s; align-self:flex-start; margin-bottom:0.1rem;
+  }
+  .day-btn:hover { color:var(--text); border-color:var(--muted); }
+
+  /* ── TOPIC ITEM ── */
+  .topic-item {
+    border-radius:4px; padding:0.35rem 0.45rem;
+    font-size:0.61rem; line-height:1.3;
+    border:1px solid transparent;
+    position:relative; display:flex; flex-direction:column; gap:0.08rem;
+    transition:filter 0.1s; cursor:pointer; user-select:none;
+  }
+  .topic-item:hover { filter:brightness(1.18); }
+
+  /* Status */
+  .s-wip  { border-color:rgba(245,166,35,0.45)!important; box-shadow:inset 0 0 0 1px rgba(245,166,35,0.1); }
+  .s-done { opacity:0.3; }
+  .s-done .tn { text-decoration:line-through; }
+
+  /* Swap highlight */
+  .swap-sel { outline:2px solid var(--wip)!important; outline-offset:1px; filter:brightness(1.3); }
+  .swap-mode-on .topic-item:hover { outline:1px dashed rgba(245,166,35,0.45); outline-offset:1px; }
+
+  .ts   { font-size:0.48rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:500; opacity:0.6; }
+  .tn   { font-weight:400; }
+  .trep { font-size:0.44rem; opacity:0.45; margin-left:2px; }
+
+  /* Study log badges on topic */
+  .tlog {
+    font-size:0.47rem; margin-top:0.1rem; opacity:0.75;
+    display:flex; flex-wrap:wrap; gap:0.2rem;
+  }
+  .tlog-badge {
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+    border-radius:2px; padding:0.05rem 0.28rem; white-space:nowrap;
+  }
+
+  /* Status dot */
+  .sdot { position:absolute; top:4px; right:4px; width:5px; height:5px; border-radius:50%; display:none; }
+  .s-wip  .sdot { display:block; background:var(--wip); }
+  .s-done .sdot { display:block; background:var(--accent); }
+
+  /* Subject colours */
+  .c-english   { background:var(--english-bg);   border-color:rgba(255,215,107,0.12); color:var(--english); }
+  .c-physics   { background:var(--physics-bg);   border-color:rgba(107,255,215,0.12); color:var(--physics); }
+  .c-biology   { background:var(--biology-bg);   border-color:rgba(255,159,107,0.12); color:var(--biology); }
+  .c-chemistry { background:var(--chemistry-bg); border-color:rgba(255,107,159,0.12); color:var(--chemistry); }
+  .c-maths     { background:var(--maths-bg);     border-color:rgba(176,107,255,0.12); color:var(--maths); }
+  .c-cs        { background:var(--cs-bg);        border-color:rgba(107,191,255,0.12); color:var(--cs); }
+  .c-appliedm  { background:var(--appliedm-bg);  border-color:rgba(168,255,107,0.12); color:var(--appliedm); }
+  .dimmed { opacity:0.07; pointer-events:none; }
+
+  /* ── SWAP BANNER ── */
+  #swap-banner {
+    display:none; position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
+    background:#1a1500; border:1px solid var(--wip); color:var(--wip);
+    font-family:'DM Mono',monospace; font-size:0.68rem;
+    padding:0.6rem 1.3rem; border-radius:6px; z-index:500;
+    letter-spacing:0.04em; text-align:center; white-space:nowrap;
+    box-shadow:0 4px 28px rgba(0,0,0,0.6);
+  }
+  #swap-banner.on { display:block; }
+  .xbtn { background:none; border:1px solid var(--wip); color:var(--wip); font-family:'DM Mono',monospace; font-size:0.6rem; padding:0.15rem 0.45rem; border-radius:3px; cursor:pointer; margin-left:0.7rem; }
+
+  /* ── MODAL OVERLAY ── */
+  .overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.84); z-index:1000;
+    backdrop-filter:blur(5px); align-items:center; justify-content:center;
+  }
+  .overlay.open { display:flex; }
+  .modal {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:1.8rem; width:min(520px,92vw); max-height:86vh; overflow-y:auto;
+  }
+  .modal h2 { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:1.1rem; color:var(--text); }
+  .modal-section { margin-bottom:1.2rem; }
+  .modal-section h3 { font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.6rem; }
+  .mfoot { margin-top:1.2rem; display:flex; gap:0.5rem; justify-content:flex-end; }
+  .btn-save { background:var(--accent); color:#0d0d0f; font-family:'DM Mono',monospace; font-size:0.65rem; font-weight:700; padding:0.45rem 1.1rem; border:none; border-radius:4px; cursor:pointer; letter-spacing:0.05em; text-transform:uppercase; }
+  .btn-save:hover { opacity:0.85; }
+
+  /* ── STUDY LOG MODAL ── */
+  .log-topic-header {
+    display:flex; align-items:center; gap:0.6rem;
+    padding:0.7rem 0.8rem; border-radius:6px; margin-bottom:1.1rem;
+  }
+  .log-subj { font-size:0.55rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.65; margin-bottom:0.08rem; }
+  .log-name { font-size:0.9rem; font-weight:500; }
+
+  /* Status picker */
+  .status-picker { display:flex; gap:0.5rem; margin-bottom:1.1rem; }
+  .spick {
+    flex:1; padding:0.55rem 0.4rem; border-radius:5px; cursor:pointer;
+    border:2px solid var(--border); background:var(--surface2);
+    text-align:center; font-family:'DM Mono',monospace; font-size:0.6rem;
+    letter-spacing:0.05em; text-transform:uppercase; color:var(--muted);
+    transition:all 0.15s;
+  }
+  .spick:hover { border-color:var(--muted); color:var(--text); }
+  .spick.on-none { border-color:var(--muted); color:var(--text); }
+  .spick.on-wip  { border-color:var(--wip); color:var(--wip); background:rgba(245,166,35,0.1); }
+  .spick.on-done { border-color:var(--accent); color:var(--accent); background:rgba(232,245,78,0.08); }
+
+  /* Study method checkboxes */
+  .method-grid { display:flex; flex-direction:column; gap:0.5rem; }
+  .method-row {
+    display:flex; align-items:center; gap:0.7rem;
+    padding:0.55rem 0.75rem; border-radius:5px;
+    background:var(--surface2); border:1px solid var(--border);
+    cursor:pointer; transition:border-color 0.15s;
+  }
+  .method-row:hover { border-color:var(--muted); }
+  .method-row.checked { border-color:var(--accent); background:rgba(232,245,78,0.05); }
+  .method-row input[type=checkbox] { display:none; }
+  .method-check {
+    width:14px; height:14px; border-radius:3px;
+    border:1px solid var(--border); background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; font-size:0.55rem; transition:all 0.15s;
+  }
+  .method-row.checked .method-check { background:var(--accent); border-color:var(--accent); color:#0d0d0f; }
+  .method-label { flex:1; font-size:0.68rem; color:var(--text); }
+  .method-sub { font-size:0.55rem; color:var(--muted); margin-top:0.06rem; }
+
+  /* Exam questions count input */
+  .eq-row { display:flex; align-items:center; gap:0.5rem; margin-top:0.4rem; }
+  .eq-row label { font-size:0.6rem; color:var(--muted); white-space:nowrap; }
+  .eq-row input[type=number] {
+    background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:'DM Mono',monospace; font-size:0.7rem; padding:0.28rem 0.5rem;
+    border-radius:4px; width:70px;
+  }
+  .eq-row input[type=number]:focus { outline:none; border-color:var(--accent); }
+  .eq-row input[type=text] {
+    background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:'DM Mono',monospace; font-size:0.68rem; padding:0.28rem 0.5rem;
+    border-radius:4px; flex:1;
+  }
+  .eq-row input[type=text]:focus { outline:none; border-color:var(--accent); }
+
+  /* ── TIMES MODAL ── */
+  .mt { display:flex; align-items:center; gap:0.7rem; padding:0.6rem; border-radius:5px; background:var(--surface2); border:1px solid var(--border); margin-bottom:0.4rem; }
+  .mt-info { flex:1; min-width:0; }
+  .mt-subj { font-size:0.54rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.08rem; }
+  .mt-name { font-size:0.74rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mt-times { display:flex; gap:0.3rem; align-items:center; flex-shrink:0; }
+  .mt-times label { font-size:0.54rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
+  .mt-times input[type=time] {
+    background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:'DM Mono',monospace; font-size:0.65rem; padding:0.22rem 0.35rem;
+    border-radius:3px; width:82px;
+  }
+  .mt-times input[type=time]:focus { outline:none; border-color:var(--accent); }
+
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Study Plan <span>'26</span></h1>
+    <div class="header-sub">4 weeks · 28 days · 164 topics</div>
+  </div>
+  <div class="hc">
+    <button class="btn" id="btn-swap" onclick="toggleSwap()">⇄ Swap</button>
+    <button class="btn" id="btn-hide" onclick="toggleHide()">Hide Done</button>
+    <button class="btn" onclick="openTimesModal()">⏱ Times</button>
+    <button class="btn" onclick="resetAll()">Reset</button>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="ll">Filter:</span>
+  <div class="li on" data-s="all"             onclick="setFilter('all')"><span class="ldot" style="background:#777"></span>All</div>
+  <div class="li"    data-s="English"         onclick="setFilter('English')"><span class="ldot" style="background:var(--english)"></span>English</div>
+  <div class="li"    data-s="Physics"         onclick="setFilter('Physics')"><span class="ldot" style="background:var(--physics)"></span>Physics</div>
+  <div class="li"    data-s="Biology"         onclick="setFilter('Biology')"><span class="ldot" style="background:var(--biology)"></span>Biology</div>
+  <div class="li"    data-s="Chemistry"       onclick="setFilter('Chemistry')"><span class="ldot" style="background:var(--chemistry)"></span>Chemistry</div>
+  <div class="li"    data-s="Maths"           onclick="setFilter('Maths')"><span class="ldot" style="background:var(--maths)"></span>Maths</div>
+  <div class="li"    data-s="Computer Science" onclick="setFilter('Computer Science')"><span class="ldot" style="background:var(--cs)"></span>Comp Sci</div>
+  <div class="li"    data-s="Applied Maths"   onclick="setFilter('Applied Maths')"><span class="ldot" style="background:var(--appliedm)"></span>Applied Maths</div>
+</div>
+
+<div class="status-bar">
+  <span style="text-transform:uppercase;letter-spacing:0.06em">Click topic to log:</span>
+  <div class="si"><span class="spip" style="background:var(--surface2);border:1px solid var(--muted)"></span>not started</div>
+  <div class="si"><span class="spip" style="background:var(--wip)"></span>in progress</div>
+  <div class="si"><span class="spip" style="background:var(--accent)"></span>done</div>
+  <span class="sb-right">⇄ Swap mode: click any two topics to swap them</span>
+</div>
+
+<div class="prog-wrap">
+  <span class="prog-lbl">Progress</span>
+  <div class="prog-track">
+    <div class="pbar pb-done" id="pb-done" style="width:0%"></div>
+    <div class="pbar pb-wip"  id="pb-wip"  style="width:0%;left:0%"></div>
+  </div>
+  <span class="pcnt-wip"  id="pcnt-wip"></span>
+  <span class="pcnt-done" id="pcnt-done">0 / 164 done</span>
+</div>
+
+<div class="wtabs">
+  <button class="wt on"  id="wt-all"    onclick="setView('all')">All</button>
+  <button class="wt"     id="wt-Week 1" onclick="setView('Week 1')">Week 1</button>
+  <button class="wt"     id="wt-Week 2" onclick="setView('Week 2')">Week 2</button>
+  <button class="wt"     id="wt-Week 3" onclick="setView('Week 3')">Week 3</button>
+  <button class="wt"     id="wt-Week 4" onclick="setView('Week 4')">Week 4</button>
+</div>
+
+<div class="main" id="main"></div>
+
+<!-- Swap banner -->
+<div id="swap-banner">
+  ⇄ <span id="swap-msg">Select a topic to move</span>
+  <button class="xbtn" onclick="endSwap()">✕ cancel</button>
+</div>
+
+<!-- Study Log Modal -->
+<div class="overlay" id="log-overlay" onclick="bgClose('log-overlay',event)">
+  <div class="modal" id="log-modal">
+    <h2 id="log-title">Log Study Session</h2>
+
+    <div id="log-topic-header"></div>
+
+    <!-- Status picker -->
+    <div class="modal-section">
+      <h3>Status</h3>
+      <div class="status-picker">
+        <div class="spick" id="sp-none" onclick="pickStatus(0)">⬜ Not started</div>
+        <div class="spick" id="sp-wip"  onclick="pickStatus(1)">🟠 In Progress</div>
+        <div class="spick" id="sp-done" onclick="pickStatus(2)">✅ Done</div>
+      </div>
+    </div>
+
+    <!-- Study method -->
+    <div class="modal-section">
+      <h3>What did you do?</h3>
+      <div class="method-grid" id="method-grid">
+
+        <div class="method-row" id="mrow-eq" onclick="toggleMethod('eq')">
+          <div class="method-check" id="mc-eq"></div>
+          <div class="method-label">
+            <div>Exam Questions</div>
+            <div class="method-sub">Record number of questions attempted</div>
+          </div>
+        </div>
+        <div class="eq-row" id="eq-count-row" style="display:none;padding-left:1.8rem">
+          <label>Questions done:</label>
+          <input type="number" id="eq-count" min="0" max="999" placeholder="0" onclick="event.stopPropagation()">
+          <label style="margin-left:0.5rem">Page info:</label>
+          <input type="text" id="eq-pages" placeholder="e.g. p47 backwards" onclick="event.stopPropagation()">
+        </div>
+
+        <div class="method-row" id="mrow-blurt" onclick="toggleMethod('blurt')">
+          <div class="method-check" id="mc-blurt"></div>
+          <div class="method-label">
+            <div>Blurting Notes</div>
+            <div class="method-sub">Wrote out everything from memory</div>
+          </div>
+        </div>
+
+        <div class="method-row" id="mrow-flash" onclick="toggleMethod('flash')">
+          <div class="method-check" id="mc-flash"></div>
+          <div class="method-label">
+            <div>Made Flashcards</div>
+            <div class="method-sub">Created revision cards</div>
+          </div>
+        </div>
+
+        <div class="method-row" id="mrow-flash-done" onclick="toggleMethod('flash-done')">
+          <div class="method-check" id="mc-flash-done"></div>
+          <div class="method-label">
+            <div>Done Flashcards</div>
+            <div class="method-sub">Went through existing flashcards</div>
+          </div>
+        </div>
+
+        <div class="method-row" id="mrow-other" onclick="toggleMethod('other')">
+          <div class="method-check" id="mc-other"></div>
+          <div class="method-label">
+            <div>Other</div>
+            <div class="method-sub">Specify below</div>
+          </div>
+        </div>
+        <div class="eq-row" id="other-text-row" style="display:none;padding-left:1.8rem">
+          <label>Notes:</label>
+          <input type="text" id="other-text" placeholder="What did you do?" onclick="event.stopPropagation()">
+        </div>
+
+      </div>
+    </div>
+
+    <div class="mfoot">
+      <button class="btn" onclick="closeLog()">Cancel</button>
+      <button class="btn-save" onclick="saveLog()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Times Modal -->
+<div class="overlay" id="times-overlay" onclick="bgClose('times-overlay',event)">
+  <div class="modal">
+    <h2 id="times-title">Time Slots</h2>
+    <div id="times-body"></div>
+    <div class="mfoot">
+      <button class="btn" onclick="closeTimes()">Cancel</button>
+      <button class="btn-save" onclick="saveTimes()">Save Times</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  PLAN  — exact order from PDF
+// ════════════════════════════════════════════════════════════════════════════
+const PLAN = [
+// ── WEEK 1 ──────────────────────────────────────────────────────────────────
+{week:"Week 1",day:"Friday",   date:"February 27, 2026", topics:[
+  {s:"English",        t:"Seamus Heaney"},
+  {s:"Physics",        t:"Mechanics 1"},
+  {s:"Biology",        t:"Homeostasis"},
+  {s:"Applied Maths",  t:"Newtons Laws"},
+  {s:"Biology",        t:"Cell division"},
+  {s:"Applied Maths",  t:"Optimal Paths"},
+]},
+{week:"Week 1",day:"Saturday", date:"February 28, 2026", topics:[
+  {s:"English",        t:"Vision and Viewpoint comparative"},
+  {s:"Biology",        t:"DNA and RNA"},
+  {s:"Applied Maths",  t:"Calculus"},
+  {s:"Applied Maths",  t:"Circular Motion"},
+  {s:"Physics",        t:"Modern Physics"},
+  {s:"Applied Maths",  t:"Linear Motion"},
+]},
+{week:"Week 1",day:"Sunday",   date:"March 1, 2026", topics:[
+  {s:"English",        t:"Paper 2 Unseen Poetry"},
+  {s:"Physics",        t:"Electromagnetism"},
+  {s:"Applied Maths",  t:"Projectiles"},
+  {s:"Biology",        t:"The Heart"},
+  {s:"Biology",        t:"Protista"},
+  {s:"Biology",        t:"Characteristics of Life"},
+]},
+{week:"Week 1",day:"Monday",   date:"March 2, 2026", topics:[
+  {s:"Biology",        t:"Genetic Crosses"},
+  {s:"Biology",        t:"Scientific Method"},
+  {s:"Maths",          t:"Differentiation and curves"},
+  {s:"English",        t:"Paper 1 Question B"},
+  {s:"Biology",        t:"Cell structure"},
+  {s:"Physics",        t:"Sound and Wave Motion"},
+]},
+{week:"Week 1",day:"Tuesday",  date:"March 3, 2026", topics:[
+  {s:"Maths",          t:"Number Systems"},
+  {s:"Chemistry",      t:"Chromatography"},
+  {s:"Biology",        t:"Genetic Engineering"},
+  {s:"Biology",        t:"Osmosis/Diffusion"},
+  {s:"Physics",        t:"Mechanics 2"},
+  {s:"English",        t:"Macbeth Character Profiles"},
+]},
+{week:"Week 1",day:"Wednesday",date:"March 4, 2026", topics:[
+  {s:"Biology",        t:"Fungi"},
+  {s:"Applied Maths",  t:"Networks and Graphs"},
+  {s:"Physics",        t:"Electricity 1"},
+  {s:"English",        t:"Seamus Heaney"},
+  {s:"Maths",          t:"Trig Ratios and Functions"},
+  {s:"Applied Maths",  t:"Differential Equations"},
+]},
+{week:"Week 1",day:"Thursday", date:"March 5, 2026", topics:[
+  {s:"Maths",          t:"Parallelograms and Triangles"},
+  {s:"English",        t:"Cultural Context - Religion"},
+  {s:"Biology",        t:"Ecology"},
+  {s:"Physics",        t:"Particle Physics"},
+  {s:"Applied Maths",  t:"Difference Equations"},
+  {s:"Biology",        t:"Lymphatic System"},
+]},
+
+// ── WEEK 2 ──────────────────────────────────────────────────────────────────
+{week:"Week 2",day:"Friday",   date:"March 6, 2026", topics:[
+  {s:"Applied Maths",  t:"Project Scheduling"},
+  {s:"Maths",          t:"Co-ordinate Geometry the Line"},
+  {s:"Maths",          t:"Logs and Indices"},
+  {s:"Physics",        t:"Light"},
+  {s:"English",        t:"Eilean Ni Chuillinean"},
+  {s:"Applied Maths",  t:"Vectors"},
+]},
+{week:"Week 2",day:"Saturday", date:"March 7, 2026", topics:[
+  {s:"Biology",        t:"Enzymes"},
+  {s:"English",        t:"Cultural Context - Gender Roles and Expectations"},
+  {s:"Physics",        t:"Heat and Temperature"},
+  {s:"Applied Maths",  t:"Collisions"},
+  {s:"Applied Maths",  t:"Work Energy Power"},
+  {s:"Maths",          t:"Enlargements"},
+]},
+{week:"Week 2",day:"Sunday",   date:"March 8, 2026", topics:[
+  {s:"English",        t:"Paper 1 Composition"},
+  {s:"Physics",        t:"Electricity 2"},
+  {s:"Biology",        t:"Blood"},
+  {s:"Computer Science",t:"Computer Systems"},
+  {s:"Maths",          t:"Arithmetic and Money"},
+  {s:"Maths",          t:"Integration"},
+]},
+{week:"Week 2",day:"Monday",   date:"March 9, 2026", topics:[
+  {s:"English",        t:"Elisabeth Bishop"},
+  {s:"Maths",          t:"Representing and analysing data"},
+  {s:"Biology",        t:"Variation and Evolution"},
+  {s:"Physics",        t:"Modern Physics"},
+  {s:"Biology",        t:"Human Digestion"},
+  {s:"Computer Science",t:"ML and AI"},
+]},
+{week:"Week 2",day:"Tuesday",  date:"March 10, 2026", topics:[
+  {s:"Chemistry",      t:"Condensation reactions, Saponification reaction"},
+  {s:"Computer Science",t:"Turing Machines"},
+  {s:"Chemistry",      t:"Thermochemistry"},
+  {s:"English",        t:"Paper 1 Question A"},
+  {s:"Physics",        t:"Sound and Wave Motion"},
+  {s:"Chemistry",      t:"Benzene and Steam Distillation"},
+]},
+{week:"Week 2",day:"Wednesday",date:"March 11, 2026", topics:[
+  {s:"English",        t:"Cultural Context - Power Structures, wealth and poverty"},
+  {s:"Chemistry",      t:"Mechanisms of Free Radical Substitution, Ionic Addition and Polymerisation"},
+  {s:"Physics",        t:"Mechanics 1"},
+  {s:"Maths",          t:"Introduction to Probability"},
+  {s:"Maths",          t:"Financial Maths"},
+  {s:"Chemistry",      t:"Stoichiometry 4"},
+]},
+{week:"Week 2",day:"Thursday", date:"March 12, 2026", topics:[
+  {s:"Biology",        t:"Monera"},
+  {s:"Physics",        t:"Mechanics 2"},
+  {s:"Maths",          t:"Normal Distributions"},
+  {s:"English",        t:"Macbeth Dramatic Techniques"},
+  {s:"Chemistry",      t:"Elimination reaction, oxidation and reduction reactions"},
+  {s:"Biology",        t:"Respiration"},
+]},
+
+// ── WEEK 3 ──────────────────────────────────────────────────────────────────
+{week:"Week 3",day:"Friday",   date:"March 13, 2026", topics:[
+  {s:"Chemistry",      t:"Formulas"},
+  {s:"English",        t:"Paula Meehan"},
+  {s:"Biology",        t:"Food"},
+  {s:"Maths",          t:"Sequences and Series"},
+  {s:"Physics",        t:"Particle Physics"},
+  {s:"Biology",        t:"Structure of a Plant"},
+]},
+{week:"Week 3",day:"Saturday", date:"March 14, 2026", topics:[
+  {s:"Maths",          t:"Linear Equations and Functions"},
+  {s:"English",        t:"Macbeth Themes"},
+  {s:"Physics",        t:"Electricity 2"},
+  {s:"Computer Science",t:"Python Testing Theory"},
+  {s:"Biology",        t:"Viruses"},
+  {s:"Computer Science",t:"Software Development"},
+]},
+{week:"Week 3",day:"Sunday",   date:"March 15, 2026", topics:[
+  {s:"Physics",        t:"Light"},
+  {s:"Chemistry",      t:"Rates of reaction"},
+  {s:"Computer Science",t:"Computers and Society"},
+  {s:"Biology",        t:"Cell diversity"},
+  {s:"English",        t:"Yeats"},
+  {s:"Chemistry",      t:"Chemical Equilibrium"},
+]},
+{week:"Week 3",day:"Monday",   date:"March 16, 2026", topics:[
+  {s:"Chemistry",      t:"Mass Spectrometer"},
+  {s:"English",        t:"Cultural Context - Religion"},
+  {s:"Chemistry",      t:"Stoichiometry 2"},
+  {s:"Computer Science",t:"Data Representation"},
+  {s:"Physics",        t:"Heat and Temperature"},
+  {s:"Biology",        t:"Photosynthesis"},
+]},
+{week:"Week 3",day:"Tuesday",  date:"March 17, 2026", topics:[
+  {s:"English",        t:"Paula Meehan"},
+  {s:"Biology",        t:"Human Defence System"},
+  {s:"Chemistry",      t:"Bohr"},
+  {s:"Physics",        t:"Electromagnetism"},
+  {s:"Biology",        t:"Nervous System"},
+  {s:"Maths",          t:"Complex Numbers 1"},
+]},
+{week:"Week 3",day:"Wednesday",date:"March 18, 2026", topics:[
+  {s:"Maths",          t:"Algebra Methods"},
+  {s:"Biology",        t:"Vegetative Propagation"},
+  {s:"Chemistry",      t:"Alkanes Alkenes and Alkynes"},
+  {s:"Maths",          t:"Inferential Statistics"},
+  {s:"Physics",        t:"Electricity 1"},
+  {s:"English",        t:"Macbeth Dramatic Techniques"},
+]},
+{week:"Week 3",day:"Thursday", date:"March 19, 2026", topics:[
+  {s:"Chemistry",      t:"Radioactivity"},
+  {s:"Biology",        t:"Human Reproduction"},
+  {s:"Maths",          t:"Differentiation by rule"},
+  {s:"Physics",        t:"Modern Physics"},
+  {s:"Chemistry",      t:"Acids and Bases"},
+  {s:"English",        t:"Paper 2 Unseen Poetry"},
+]},
+
+// ── WEEK 4 ──────────────────────────────────────────────────────────────────
+{week:"Week 4",day:"Friday",   date:"March 20, 2026", topics:[
+  {s:"Chemistry",      t:"Stoichiometry 3"},
+  {s:"Chemistry",      t:"Aldehydes, Ketones, Carboxylic Acids and Esters"},
+  {s:"English",        t:"Paper 1 Question A"},
+  {s:"Maths",          t:"Intro to differentiation"},
+  {s:"Computer Science",t:"Recursion"},
+  {s:"Physics",        t:"Electricity 2"},
+]},
+{week:"Week 4",day:"Saturday", date:"March 21, 2026", topics:[
+  {s:"Chemistry",      t:"Van Der Waals and Dipole Dipole Attraction"},
+  {s:"Chemistry",      t:"Ionic Bonding"},
+  {s:"Chemistry",      t:"Fuels and preparation of Ethene and Ethyne"},
+  {s:"Physics",        t:"Light"},
+  {s:"Biology",        t:"The Senses"},
+  {s:"English",        t:"Vision and Viewpoint comparative"},
+]},
+{week:"Week 4",day:"Sunday",   date:"March 22, 2026", topics:[
+  {s:"Chemistry",      t:"Chloroalkanes and Alcohols"},
+  {s:"Biology",        t:"Human Breathing"},
+  {s:"Physics",        t:"Mechanics 1"},
+  {s:"Chemistry",      t:"Volumetric Analysis"},
+  {s:"Chemistry",      t:"Pure Polar and Dative Covalent Bonding"},
+  {s:"English",        t:"Paper 1 Question B"},
+]},
+{week:"Week 4",day:"Monday",   date:"March 23, 2026", topics:[
+  {s:"Chemistry",      t:"Ionisation Energy"},
+  {s:"Chemistry",      t:"Preparation of Benzoic acid"},
+  {s:"English",        t:"Cultural Context - Gender Roles and Expectations"},
+  {s:"Physics",        t:"Heat and Temperature"},
+  {s:"Maths",          t:"Functions"},
+  {s:"Maths",          t:"Trig Graphs"},
+]},
+{week:"Week 4",day:"Tuesday",  date:"March 24, 2026", topics:[
+  {s:"Biology",        t:"Transport of a Plant"},
+  {s:"Chemistry",      t:"Periodic Table"},
+  {s:"Biology",        t:"Endocrine System"},
+  {s:"Maths",          t:"Rules of Probability"},
+  {s:"Physics",        t:"Electricity 1"},
+  {s:"English",        t:"Eilean Ni Chuillinean"},
+]},
+{week:"Week 4",day:"Wednesday",date:"March 25, 2026", topics:[
+  {s:"Maths",          t:"Constructions"},
+  {s:"English",        t:"Macbeth Character Profiles"},
+  {s:"Biology",        t:"Skeleton"},
+  {s:"Chemistry",      t:"Oxidation and Reduction"},
+  {s:"Biology",        t:"Plant Reproduction"},
+  {s:"Physics",        t:"Particle Physics"},
+]},
+{week:"Week 4",day:"Thursday", date:"March 26, 2026", topics:[
+  {s:"Chemistry",      t:"PH and Indicators"},
+  {s:"Chemistry",      t:"Shapes of Molecules"},
+  {s:"English",        t:"Elisabeth Bishop"},
+  {s:"Biology",        t:"Plant Response"},
+  {s:"Biology",        t:"Excretion"},
+  {s:"Physics",        t:"Mechanics 2"},
+]},
+];
+
+// Tag repeats based on first appearance
+(()=>{
+  const seen = new Set();
+  PLAN.forEach(d => d.topics.forEach(t => {
+    const k = t.s+':'+t.t; t.isRepeat = seen.has(k); seen.add(k);
+  }));
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════════════════════
+const SC = {'English':'c-english','Physics':'c-physics','Biology':'c-biology','Chemistry':'c-chemistry','Maths':'c-maths','Computer Science':'c-cs','Applied Maths':'c-appliedm'};
+const SCOL = {'English':'var(--english)','Physics':'var(--physics)','Biology':'var(--biology)','Chemistry':'var(--chemistry)','Maths':'var(--maths)','Computer Science':'var(--cs)','Applied Maths':'var(--appliedm)'};
+const sc   = s => SC[s]   || 'c-maths';
+const scol = s => SCOL[s] || 'var(--muted)';
+
+// ════════════════════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════════════════════
+const SK = 'sp26v4';
+function load() { try { return JSON.parse(localStorage.getItem(SK))||{}; } catch { return {}; } }
+function save() { localStorage.setItem(SK, JSON.stringify(ST)); }
+
+let ST = load();
+if (!ST.status)   ST.status   = {};   // "d,ti" -> 0|1|2
+if (!ST.times)    ST.times    = {};   // "d,ti" -> {start,end}
+if (!ST.logs)     ST.logs     = {};   // "d,ti" -> {methods:{eq,blurt,flash,flashDone,other}, eqCount, eqPages, otherText}
+if (!ST.tdata)    ST.tdata    = null; // after swaps
+if (ST.hideDone === undefined) ST.hideDone = false;
+
+// Restore swapped topic positions
+if (ST.tdata) {
+  ST.tdata.forEach((dt,di) => dt.forEach((t,ti) => {
+    if (PLAN[di]?.topics[ti]) { PLAN[di].topics[ti].s = t.s; PLAN[di].topics[ti].t = t.t; }
+  }));
+}
+
+function getStatus(d,ti) { return ST.status[`${d},${ti}`] || 0; }
+function getTime(d,ti)   { return ST.times[`${d},${ti}`]  || {start:'',end:''}; }
+function getLog(d,ti)    { return ST.logs[`${d},${ti}`]   || {methods:{},eqCount:'',eqPages:'',otherText:''}; }
+function today() { return new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  UI STATE
+// ════════════════════════════════════════════════════════════════════════════
+let view   = 'all';
+let filter = 'all';
+let swapOn = false;
+let swapA  = null;
+
+// Log modal state
+let logD = null, logTi = null, logStatus = 0, logMethods = {};
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PROGRESS
+// ════════════════════════════════════════════════════════════════════════════
+function updateProgress() {
+  const total = PLAN.reduce((s,d) => s + d.topics.length, 0);
+  let done = 0, wip = 0;
+  Object.values(ST.status).forEach(v => { if(v===2) done++; else if(v===1) wip++; });
+  const dp = total ? done/total*100 : 0, wp = total ? wip/total*100 : 0;
+  document.getElementById('pb-done').style.width = dp + '%';
+  document.getElementById('pb-wip').style.width  = wp + '%';
+  document.getElementById('pb-wip').style.left   = dp + '%';
+  document.getElementById('pcnt-done').textContent = `${done} / ${total} done`;
+  document.getElementById('pcnt-wip').textContent  = wip ? `${wip} in progress` : '';
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  LOG BADGES  — format a short summary of what was studied
+// ════════════════════════════════════════════════════════════════════════════
+function logBadges(d, ti) {
+  const lg = getLog(d, ti);
+  const badges = [];
+  if (lg.methods.eq)         badges.push(`📝 ${lg.eqCount||'?'} Q${lg.eqPages?' ('+lg.eqPages+')':''}`);
+  if (lg.methods.blurt)      badges.push('✍️ Blurt');
+  if (lg.methods.flash)      badges.push('🃏 Made cards');
+  if (lg.methods.flashDone)  badges.push('✅ Done cards');
+  if (lg.methods.other && lg.otherText) badges.push('💬 ' + lg.otherText.slice(0,20));
+  else if (lg.methods.other) badges.push('💬 Other');
+  return badges;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════════════════════
+function render() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  main.classList.toggle('swap-mode-on', swapOn);
+
+  const td = today();
+  const weekMap = {};
+  PLAN.forEach((day,di) => { if(!weekMap[day.week]) weekMap[day.week]=[]; weekMap[day.week].push({day,di}); });
+
+  Object.entries(weekMap).forEach(([wk, days]) => {
+    if (view !== 'all' && view !== wk) return;
+    const sec = document.createElement('div');
+    sec.style.marginBottom = '2.5rem';
+
+    const wh = document.createElement('div');
+    wh.className = 'week-hdr';
+    const ds = days.map(x=>x.day.date);
+    wh.innerHTML = `<div class="wk-title">${wk}</div><div class="wk-range">${ds[0].replace(', 2026','')} — ${ds.at(-1).replace(', 2026','')}</div>`;
+    sec.appendChild(wh);
+
+    const grid = document.createElement('div');
+    grid.className = 'days-grid';
+
+    days.forEach(({day,di}) => {
+      const isToday = day.date === td;
+      const card = document.createElement('div');
+      card.className = 'day-card' + (isToday ? ' today' : '');
+      if (isToday) card.innerHTML = '<div class="today-badge">Today</div>';
+
+      const parts = day.date.split(' ');
+      card.innerHTML += `<div class="dname">${day.day}</div><div class="ddate">${parts[1].replace(',','')} <span style="font-size:0.78rem;opacity:0.4">${parts[0]}</span></div>`;
+
+      // Times button
+      const tb = document.createElement('button');
+      tb.className = 'day-btn'; tb.textContent = '⏱ times';
+      tb.onclick = e => { e.stopPropagation(); openTimesFor(di); };
+      card.appendChild(tb);
+
+      day.topics.forEach((tp, ti) => {
+        const status = getStatus(di, ti);
+        const isDim  = filter !== 'all' && tp.s !== filter;
+        const isSel  = swapA && swapA.d === di && swapA.ti === ti;
+        if (ST.hideDone && status === 2) return;
+
+        const badges = logBadges(di, ti);
+        const time   = getTime(di, ti);
+        const timeStr = (time.start||time.end)
+          ? `<div style="font-size:0.47rem;opacity:0.4;margin-top:0.08rem">${time.start||''}${time.start&&time.end?'–':''}${time.end||''}</div>` : '';
+        const badgeStr = badges.length
+          ? `<div class="tlog">${badges.map(b=>`<span class="tlog-badge">${b}</span>`).join('')}</div>` : '';
+
+        const item = document.createElement('div');
+        item.className = [sc(tp.s), status===1?'s-wip':'', status===2?'s-done':'', isDim?'dimmed':'', isSel?'swap-sel':'', 'topic-item'].filter(Boolean).join(' ');
+        item.title = swapOn ? `Swap: "${tp.t}"` : `Click to open study log`;
+        item.innerHTML = `
+          <div class="sdot"></div>
+          <div class="ts">${tp.s}${tp.isRepeat?'<span class="trep"> ↩</span>':''}</div>
+          <div class="tn">${tp.t}</div>
+          ${timeStr}${badgeStr}`;
+
+        item.onclick = e => { e.stopPropagation(); swapOn ? doSwapClick(di,ti) : openLog(di,ti); };
+        card.appendChild(item);
+      });
+
+      grid.appendChild(card);
+    });
+
+    sec.appendChild(grid);
+    main.appendChild(sec);
+  });
+
+  updateProgress();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  STUDY LOG MODAL
+// ════════════════════════════════════════════════════════════════════════════
+function openLog(d, ti) {
+  logD = d; logTi = ti;
+  const tp = PLAN[d].topics[ti];
+  logStatus  = getStatus(d, ti);
+  const lg   = getLog(d, ti);
+  logMethods = { ...lg.methods };
+
+  // Header
+  const hdr = document.getElementById('log-topic-header');
+  hdr.className = 'log-topic-header ' + sc(tp.s);
+  hdr.innerHTML = `<div><div class="log-subj">${tp.s}</div><div class="log-name">${tp.t}</div></div>`;
+
+  document.getElementById('log-title').textContent = 'Study Log';
+
+  // Status picker
+  refreshStatusPicker();
+
+  // Methods
+  ['eq','blurt','flash','flash-done','other'].forEach(m => {
+    const key = m === 'flash-done' ? 'flashDone' : m;
+    const isOn = !!logMethods[key];
+    document.getElementById(`mrow-${m}`).classList.toggle('checked', isOn);
+    document.getElementById(`mc-${m}`).textContent = isOn ? '✓' : '';
+  });
+  // Eq details
+  document.getElementById('eq-count').value = lg.eqCount || '';
+  document.getElementById('eq-pages').value  = lg.eqPages || '';
+  document.getElementById('eq-count-row').style.display = logMethods.eq ? 'flex' : 'none';
+  // Other text
+  document.getElementById('other-text').value = lg.otherText || '';
+  document.getElementById('other-text-row').style.display = logMethods.other ? 'flex' : 'none';
+
+  document.getElementById('log-overlay').classList.add('open');
+}
+
+function refreshStatusPicker() {
+  ['none','wip','done'].forEach((n,i) => {
+    document.getElementById(`sp-${n}`).className = 'spick' + (logStatus===i ? ` on-${n}` : '');
+  });
+}
+
+function pickStatus(s) { logStatus = s; refreshStatusPicker(); }
+
+function toggleMethod(m) {
+  const key = m === 'flash-done' ? 'flashDone' : m;
+  logMethods[key] = !logMethods[key];
+  const isOn = logMethods[key];
+  document.getElementById(`mrow-${m}`).classList.toggle('checked', isOn);
+  document.getElementById(`mc-${m}`).textContent = isOn ? '✓' : '';
+  if (m === 'eq')    document.getElementById('eq-count-row').style.display    = isOn ? 'flex' : 'none';
+  if (m === 'other') document.getElementById('other-text-row').style.display  = isOn ? 'flex' : 'none';
+}
+
+function saveLog() {
+  const k = `${logD},${logTi}`;
+  ST.status[k] = logStatus;
+  ST.logs[k] = {
+    methods:   { ...logMethods },
+    eqCount:   document.getElementById('eq-count').value,
+    eqPages:   document.getElementById('eq-pages').value,
+    otherText: document.getElementById('other-text').value,
+  };
+  save(); closeLog(); render();
+}
+
+function closeLog() { document.getElementById('log-overlay').classList.remove('open'); }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  TIMES MODAL
+// ════════════════════════════════════════════════════════════════════════════
+function openTimesFor(di) {
+  const day = PLAN[di];
+  document.getElementById('times-title').textContent = `⏱ ${day.day}, ${day.date}`;
+  const body = document.getElementById('times-body');
+  body.innerHTML = '';
+  day.topics.forEach((tp,ti) => {
+    const tm = getTime(di,ti);
+    const row = document.createElement('div');
+    row.className = 'mt';
+    row.innerHTML = `
+      <div class="mt-info">
+        <div class="mt-subj" style="color:${scol(tp.s)}">${tp.s}</div>
+        <div class="mt-name">${tp.t}</div>
+      </div>
+      <div class="mt-times">
+        <label>From</label><input type="time" data-d="${di}" data-ti="${ti}" data-f="start" value="${tm.start||''}">
+        <label>To</label><input type="time" data-d="${di}" data-ti="${ti}" data-f="end" value="${tm.end||''}">
+      </div>`;
+    body.appendChild(row);
+  });
+  document.getElementById('times-overlay').classList.add('open');
+}
+
+function openTimesModal() {
+  const t = today(); let idx = PLAN.findIndex(d=>d.date===t); if(idx<0) idx=0; openTimesFor(idx);
+}
+function saveTimes() {
+  document.querySelectorAll('#times-body input[type=time]').forEach(inp => {
+    const k=`${inp.dataset.d},${inp.dataset.ti}`;
+    if(!ST.times[k]) ST.times[k]={start:'',end:''};
+    ST.times[k][inp.dataset.f]=inp.value;
+  });
+  save(); closeTimes(); render();
+}
+function closeTimes() { document.getElementById('times-overlay').classList.remove('open'); }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  SWAP
+// ════════════════════════════════════════════════════════════════════════════
+function toggleSwap() {
+  swapOn = !swapOn; swapA = null;
+  const btn = document.getElementById('btn-swap');
+  btn.classList.toggle('swap-on', swapOn);
+  btn.textContent = swapOn ? '✕ Exit Swap' : '⇄ Swap';
+  document.getElementById('swap-banner').classList.toggle('on', swapOn);
+  document.getElementById('swap-msg').textContent = 'Select a topic to move';
+  render();
+}
+function endSwap() { swapOn=false; swapA=null; document.getElementById('btn-swap').classList.remove('swap-on'); document.getElementById('btn-swap').textContent='⇄ Swap'; document.getElementById('swap-banner').classList.remove('on'); render(); }
+
+function doSwapClick(d, ti) {
+  if (!swapA) {
+    swapA = {d,ti};
+    document.getElementById('swap-msg').textContent = `"${PLAN[d].topics[ti].t}" selected — pick the topic to swap with`;
+    render();
+  } else {
+    if (swapA.d===d && swapA.ti===ti) { swapA=null; document.getElementById('swap-msg').textContent='Select a topic to move'; render(); return; }
+    const A=swapA, B={d,ti};
+    const ta=PLAN[A.d].topics[A.ti], tb=PLAN[B.d].topics[B.ti];
+    const tmpS=ta.s, tmpT=ta.t; ta.s=tb.s; ta.t=tb.t; tb.s=tmpS; tb.t=tmpT;
+    const ka=`${A.d},${A.ti}`, kb=`${B.d},${B.ti}`;
+    [ST.status[ka],ST.status[kb]]=[ST.status[kb],ST.status[ka]];
+    [ST.times[ka], ST.times[kb]] =[ST.times[kb], ST.times[ka]];
+    [ST.logs[ka],  ST.logs[kb]]  =[ST.logs[kb],  ST.logs[ka]];
+    ST.tdata = PLAN.map(day=>day.topics.map(t=>({s:t.s,t:t.t})));
+    save(); swapA=null;
+    document.getElementById('swap-msg').textContent='Swapped! Pick another or exit.';
+    render();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  VIEW / FILTER / MISC
+// ════════════════════════════════════════════════════════════════════════════
+function setView(v) {
+  view=v;
+  document.querySelectorAll('.wt').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('wt-'+(v==='all'?'all':v)); if(el) el.classList.add('on');
+  render();
+}
+function setFilter(f) {
+  filter=f;
+  document.querySelectorAll('.li').forEach(el=>el.classList.toggle('on',el.dataset.s===f));
+  render();
+}
+function toggleHide() {
+  ST.hideDone=!ST.hideDone;
+  document.getElementById('btn-hide').textContent=ST.hideDone?'Show Done':'Hide Done';
+  save(); render();
+}
+function resetAll() {
+  if(!confirm('Reset all progress, logs and swaps?')) return;
+  localStorage.removeItem(SK); location.reload();
+}
+function bgClose(id,e) { if(e.target===document.getElementById(id)) { if(id==='log-overlay') closeLog(); else closeTimes(); } }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════════════════
+if (ST.hideDone) document.getElementById('btn-hide').textContent='Show Done';
+render();
+</script>
+</body>
+</html>
