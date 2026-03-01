@@ -286,7 +286,7 @@
 <header>
   <div class="header-left">
     <h1>Study Plan <span>'26</span></h1>
-    <div class="header-sub">4 weeks · 28 days · 164 topics</div>
+    <div class="header-sub" id="plan-meta">4 weeks · 28 days · 164 topics</div>
   </div>
   <div class="hc">
     <button class="btn" id="btn-swap" onclick="toggleSwap()">⇄ Swap</button>
@@ -700,13 +700,14 @@ const PLAN = [
 ]},
 ];
 
-// Tag repeats based on first appearance
-(()=>{
+function tagRepeats() {
   const seen = new Set();
   PLAN.forEach(d => d.topics.forEach(t => {
-    const k = t.s+':'+t.t; t.isRepeat = seen.has(k); seen.add(k);
+    const k = t.s + ':' + t.t;
+    t.isRepeat = seen.has(k);
+    seen.add(k);
   }));
-})();
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -732,9 +733,16 @@ if (ST.hideDone === undefined) ST.hideDone = false;
 
 // Restore swapped topic positions
 if (ST.tdata) {
-  ST.tdata.forEach((dt,di) => dt.forEach((t,ti) => {
-    if (PLAN[di]?.topics[ti]) { PLAN[di].topics[ti].s = t.s; PLAN[di].topics[ti].t = t.t; }
-  }));
+  ST.tdata.forEach((dt,di) => {
+    if (PLAN[di] && Array.isArray(dt)) {
+      PLAN[di].topics = dt.map(t => ({ s: t.s, t: t.t }));
+    }
+  });
+}
+tagRepeats();
+
+function persistTopics() {
+  ST.tdata = PLAN.map(day => day.topics.map(t => ({ s: t.s, t: t.t })));
 }
 
 function getStatus(d,ti) { return ST.status[`${d},${ti}`] || 0; }
@@ -766,6 +774,8 @@ function updateProgress() {
   document.getElementById('pb-wip').style.left   = dp + '%';
   document.getElementById('pcnt-done').textContent = `${done} / ${total} done`;
   document.getElementById('pcnt-wip').textContent  = wip ? `${wip} in progress` : '';
+  const meta = document.getElementById('plan-meta');
+  if (meta) meta.textContent = `4 weeks · ${PLAN.length} days · ${total} topics`;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -823,6 +833,12 @@ function render() {
       tb.className = 'day-btn'; tb.textContent = '⏱ times';
       tb.onclick = e => { e.stopPropagation(); openTimesFor(di); };
       card.appendChild(tb);
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'day-btn';
+      addBtn.textContent = '+ subject';
+      addBtn.onclick = e => { e.stopPropagation(); addSubjectToDay(di); };
+      card.appendChild(addBtn);
 
       day.topics.forEach((tp, ti) => {
         const status = getStatus(di, ti);
@@ -997,7 +1013,7 @@ function doSwapClick(d, ti) {
     [ST.status[ka],ST.status[kb]]=[ST.status[kb],ST.status[ka]];
     [ST.times[ka], ST.times[kb]] =[ST.times[kb], ST.times[ka]];
     [ST.logs[ka],  ST.logs[kb]]  =[ST.logs[kb],  ST.logs[ka]];
-    ST.tdata = PLAN.map(day=>day.topics.map(t=>({s:t.s,t:t.t})));
+    persistTopics();
     save(); swapA=null;
     document.getElementById('swap-msg').textContent='Swapped! Pick another or exit.';
     render();
@@ -1022,6 +1038,26 @@ function toggleHide() {
   ST.hideDone=!ST.hideDone;
   document.getElementById('btn-hide').textContent=ST.hideDone?'Show Done':'Hide Done';
   save(); render();
+}
+function addSubjectToDay(di) {
+  const day = PLAN[di];
+  if (!day) return;
+
+  const subject = prompt(`Add subject for ${day.day}, ${day.date}:`, 'Maths');
+  if (subject === null) return;
+  const cleanSubject = subject.trim();
+  if (!cleanSubject) return;
+
+  const topic = prompt(`Add topic name for ${cleanSubject}:`, 'New topic');
+  if (topic === null) return;
+  const cleanTopic = topic.trim();
+  if (!cleanTopic) return;
+
+  day.topics.push({ s: cleanSubject, t: cleanTopic });
+  tagRepeats();
+  persistTopics();
+  save();
+  render();
 }
 function resetAll() {
   if(!confirm('Reset all progress, logs and swaps?')) return;
