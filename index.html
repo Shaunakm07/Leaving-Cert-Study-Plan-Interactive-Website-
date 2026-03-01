@@ -796,7 +796,15 @@ function persistTopics() {
 
 function getStatus(d,ti) { return ST.status[`${d},${ti}`] || 0; }
 function getTime(d,ti)   { return ST.times[`${d},${ti}`]  || {start:'',end:''}; }
-function getLog(d,ti)    { return ST.logs[`${d},${ti}`]   || {methods:{},eqCount:'',eqPages:'',otherText:''}; }
+function getLog(d,ti) {
+  const raw = ST.logs[`${d},${ti}`] || {};
+  return {
+    methods: (raw.methods && typeof raw.methods === 'object') ? raw.methods : {},
+    eqCount: raw.eqCount || '',
+    eqPages: raw.eqPages || '',
+    otherText: raw.otherText || '',
+  };
+}
 function today() { return new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
 
 // ════════════════════════════════════════════════════════════════════════════
