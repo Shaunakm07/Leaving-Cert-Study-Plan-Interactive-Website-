@@ -276,6 +276,24 @@
   }
   .mt-times input[type=time]:focus { outline:none; border-color:var(--accent); }
 
+
+  /* Add subject modal form */
+  .add-row { display:flex; flex-direction:column; gap:0.35rem; margin-bottom:0.7rem; }
+  .add-row label {
+    font-size:0.58rem; color:var(--muted);
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .add-row input[type=text] {
+    width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:'DM Mono',monospace; font-size:0.7rem; padding:0.5rem 0.6rem; border-radius:4px;
+  }
+  .add-row input[type=text]:focus { outline:none; border-color:var(--accent); }
+  .add-error {
+    display:none; margin-top:0.2rem; font-size:0.58rem;
+    color:var(--wip); letter-spacing:0.03em;
+  }
+  .add-error.on { display:block; }
+
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
@@ -286,7 +304,7 @@
 <header>
   <div class="header-left">
     <h1>Study Plan <span>'26</span></h1>
-    <div class="header-sub">4 weeks · 28 days · 164 topics</div>
+    <div class="header-sub" id="plan-meta">4 weeks · 28 days · 164 topics</div>
   </div>
   <div class="hc">
     <button class="btn" id="btn-swap" onclick="toggleSwap()">⇄ Swap</button>
@@ -432,6 +450,31 @@
     <div class="mfoot">
       <button class="btn" onclick="closeTimes()">Cancel</button>
       <button class="btn-save" onclick="saveTimes()">Save Times</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Subject Modal -->
+<div class="overlay" id="add-overlay" onclick="bgClose('add-overlay',event)">
+  <div class="modal">
+    <h2 id="add-title">Add Subject to Day</h2>
+    <div class="modal-section">
+      <h3>Subject + Topic</h3>
+      <form id="add-form" onsubmit="saveAddedSubject(event)">
+        <div class="add-row">
+          <label for="add-subject">Subject</label>
+          <input type="text" id="add-subject" placeholder="e.g. Maths">
+        </div>
+        <div class="add-row">
+          <label for="add-topic">Topic</label>
+          <input type="text" id="add-topic" placeholder="e.g. Integration">
+        </div>
+        <div class="add-error" id="add-error"></div>
+        <div class="mfoot">
+          <button class="btn" type="button" onclick="closeAddSubject()">Cancel</button>
+          <button class="btn-save" type="submit">Add Topic</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -700,13 +743,14 @@ const PLAN = [
 ]},
 ];
 
-// Tag repeats based on first appearance
-(()=>{
+function tagRepeats() {
   const seen = new Set();
   PLAN.forEach(d => d.topics.forEach(t => {
-    const k = t.s+':'+t.t; t.isRepeat = seen.has(k); seen.add(k);
+    const k = t.s + ':' + t.t;
+    t.isRepeat = seen.has(k);
+    seen.add(k);
   }));
-})();
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -724,22 +768,44 @@ function load() { try { return JSON.parse(localStorage.getItem(SK))||{}; } catch
 function save() { localStorage.setItem(SK, JSON.stringify(ST)); }
 
 let ST = load();
-if (!ST.status)   ST.status   = {};   // "d,ti" -> 0|1|2
-if (!ST.times)    ST.times    = {};   // "d,ti" -> {start,end}
-if (!ST.logs)     ST.logs     = {};   // "d,ti" -> {methods:{eq,blurt,flash,flashDone,other}, eqCount, eqPages, otherText}
-if (!ST.tdata)    ST.tdata    = null; // after swaps
+if (!ST || typeof ST !== 'object' || Array.isArray(ST)) ST = {};
+if (!ST.status || typeof ST.status !== 'object' || Array.isArray(ST.status)) ST.status = {}; // "d,ti" -> 0|1|2
+if (!ST.times  || typeof ST.times  !== 'object' || Array.isArray(ST.times))  ST.times  = {}; // "d,ti" -> {start,end}
+if (!ST.logs   || typeof ST.logs   !== 'object' || Array.isArray(ST.logs))   ST.logs   = {}; // "d,ti" -> {methods:{eq,blurt,flash,flashDone,other}, eqCount, eqPages, otherText}
+if (!Array.isArray(ST.tdata)) ST.tdata = null; // after swaps
 if (ST.hideDone === undefined) ST.hideDone = false;
 
 // Restore swapped topic positions
-if (ST.tdata) {
-  ST.tdata.forEach((dt,di) => dt.forEach((t,ti) => {
-    if (PLAN[di]?.topics[ti]) { PLAN[di].topics[ti].s = t.s; PLAN[di].topics[ti].t = t.t; }
-  }));
+if (Array.isArray(ST.tdata)) {
+  ST.tdata.forEach((dt,di) => {
+    if (PLAN[di] && Array.isArray(dt)) {
+      const safeTopics = dt
+        .filter(t => t && typeof t === 'object')
+        .map(t => ({
+          s: typeof t.s === 'string' && t.s.trim() ? t.s.trim() : 'Maths',
+          t: typeof t.t === 'string' && t.t.trim() ? t.t.trim() : 'Untitled Topic',
+        }));
+      if (safeTopics.length) PLAN[di].topics = safeTopics;
+    }
+  });
+}
+tagRepeats();
+
+function persistTopics() {
+  ST.tdata = PLAN.map(day => day.topics.map(t => ({ s: t.s, t: t.t })));
 }
 
 function getStatus(d,ti) { return ST.status[`${d},${ti}`] || 0; }
 function getTime(d,ti)   { return ST.times[`${d},${ti}`]  || {start:'',end:''}; }
-function getLog(d,ti)    { return ST.logs[`${d},${ti}`]   || {methods:{},eqCount:'',eqPages:'',otherText:''}; }
+function getLog(d,ti) {
+  const raw = ST.logs[`${d},${ti}`] || {};
+  return {
+    methods: (raw.methods && typeof raw.methods === 'object') ? raw.methods : {},
+    eqCount: raw.eqCount || '',
+    eqPages: raw.eqPages || '',
+    otherText: raw.otherText || '',
+  };
+}
 function today() { return new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -752,6 +818,9 @@ let swapA  = null;
 
 // Log modal state
 let logD = null, logTi = null, logStatus = 0, logMethods = {};
+
+// Add subject modal state
+let addDayIndex = null;
 
 // ════════════════════════════════════════════════════════════════════════════
 //  PROGRESS
@@ -766,6 +835,8 @@ function updateProgress() {
   document.getElementById('pb-wip').style.left   = dp + '%';
   document.getElementById('pcnt-done').textContent = `${done} / ${total} done`;
   document.getElementById('pcnt-wip').textContent  = wip ? `${wip} in progress` : '';
+  const meta = document.getElementById('plan-meta');
+  if (meta) meta.textContent = `4 weeks · ${PLAN.length} days · ${total} topics`;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -823,6 +894,12 @@ function render() {
       tb.className = 'day-btn'; tb.textContent = '⏱ times';
       tb.onclick = e => { e.stopPropagation(); openTimesFor(di); };
       card.appendChild(tb);
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'day-btn';
+      addBtn.textContent = '+ subject';
+      addBtn.onclick = e => { e.stopPropagation(); addSubjectToDay(di); };
+      card.appendChild(addBtn);
 
       day.topics.forEach((tp, ti) => {
         const status = getStatus(di, ti);
@@ -997,7 +1074,7 @@ function doSwapClick(d, ti) {
     [ST.status[ka],ST.status[kb]]=[ST.status[kb],ST.status[ka]];
     [ST.times[ka], ST.times[kb]] =[ST.times[kb], ST.times[ka]];
     [ST.logs[ka],  ST.logs[kb]]  =[ST.logs[kb],  ST.logs[ka]];
-    ST.tdata = PLAN.map(day=>day.topics.map(t=>({s:t.s,t:t.t})));
+    persistTopics();
     save(); swapA=null;
     document.getElementById('swap-msg').textContent='Swapped! Pick another or exit.';
     render();
@@ -1023,11 +1100,55 @@ function toggleHide() {
   document.getElementById('btn-hide').textContent=ST.hideDone?'Show Done':'Hide Done';
   save(); render();
 }
+function addSubjectToDay(di) {
+  const day = PLAN[di];
+  if (!day) return;
+  addDayIndex = di;
+  document.getElementById('add-title').textContent = `Add Subject • ${day.day}, ${day.date}`;
+  document.getElementById('add-subject').value = '';
+  document.getElementById('add-topic').value = '';
+  document.getElementById('add-error').classList.remove('on');
+  document.getElementById('add-error').textContent = '';
+  document.getElementById('add-overlay').classList.add('open');
+  document.getElementById('add-subject').focus();
+}
+function saveAddedSubject(event) {
+  event.preventDefault();
+  if (addDayIndex === null) return;
+
+  const cleanSubject = document.getElementById('add-subject').value.trim();
+  const cleanTopic = document.getElementById('add-topic').value.trim();
+  const err = document.getElementById('add-error');
+  if (!cleanSubject || !cleanTopic) {
+    err.textContent = 'Please enter both a subject and a topic.';
+    err.classList.add('on');
+    return;
+  }
+  err.classList.remove('on');
+  err.textContent = '';
+
+  PLAN[addDayIndex].topics.push({ s: cleanSubject, t: cleanTopic });
+  tagRepeats();
+  persistTopics();
+  save();
+  closeAddSubject();
+  render();
+}
+function closeAddSubject() {
+  addDayIndex = null;
+  document.getElementById('add-overlay').classList.remove('open');
+  document.getElementById('add-error').classList.remove('on');
+}
 function resetAll() {
   if(!confirm('Reset all progress, logs and swaps?')) return;
   localStorage.removeItem(SK); location.reload();
 }
-function bgClose(id,e) { if(e.target===document.getElementById(id)) { if(id==='log-overlay') closeLog(); else closeTimes(); } }
+function bgClose(id,e) {
+  if (e.target !== document.getElementById(id)) return;
+  if (id === 'log-overlay') closeLog();
+  else if (id === 'times-overlay') closeTimes();
+  else if (id === 'add-overlay') closeAddSubject();
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 //  INIT
