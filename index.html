@@ -288,6 +288,11 @@
     font-family:'DM Mono',monospace; font-size:0.7rem; padding:0.5rem 0.6rem; border-radius:4px;
   }
   .add-row input[type=text]:focus { outline:none; border-color:var(--accent); }
+  .add-error {
+    display:none; margin-top:0.2rem; font-size:0.58rem;
+    color:var(--wip); letter-spacing:0.03em;
+  }
+  .add-error.on { display:block; }
 
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
@@ -458,6 +463,13 @@
       <form id="add-form" onsubmit="saveAddedSubject(event)">
         <div class="add-row">
           <label for="add-subject">Subject</label>
+          <input type="text" id="add-subject" placeholder="e.g. Maths">
+        </div>
+        <div class="add-row">
+          <label for="add-topic">Topic</label>
+          <input type="text" id="add-topic" placeholder="e.g. Integration">
+        </div>
+        <div class="add-error" id="add-error"></div>
           <input type="text" id="add-subject" placeholder="e.g. Maths" required>
         </div>
         <div class="add-row">
@@ -1082,6 +1094,42 @@ function toggleHide() {
 function addSubjectToDay(di) {
   const day = PLAN[di];
   if (!day) return;
+  addDayIndex = di;
+  document.getElementById('add-title').textContent = `Add Subject • ${day.day}, ${day.date}`;
+  document.getElementById('add-subject').value = '';
+  document.getElementById('add-topic').value = '';
+  document.getElementById('add-error').classList.remove('on');
+  document.getElementById('add-error').textContent = '';
+  document.getElementById('add-overlay').classList.add('open');
+  document.getElementById('add-subject').focus();
+}
+function saveAddedSubject(event) {
+  event.preventDefault();
+  if (addDayIndex === null) return;
+
+  const cleanSubject = document.getElementById('add-subject').value.trim();
+  const cleanTopic = document.getElementById('add-topic').value.trim();
+  const err = document.getElementById('add-error');
+  if (!cleanSubject || !cleanTopic) {
+    err.textContent = 'Please enter both a subject and a topic.';
+    err.classList.add('on');
+    return;
+  }
+  err.classList.remove('on');
+  err.textContent = '';
+
+  PLAN[addDayIndex].topics.push({ s: cleanSubject, t: cleanTopic });
+  tagRepeats();
+  persistTopics();
+  save();
+  closeAddSubject();
+  render();
+}
+function closeAddSubject() {
+  addDayIndex = null;
+  document.getElementById('add-overlay').classList.remove('open');
+  document.getElementById('add-error').classList.remove('on');
+}
 
   const subject = prompt(`Add subject for ${day.day}, ${day.date}:`, 'Maths');
   if (subject === null) return;
