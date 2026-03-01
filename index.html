@@ -276,6 +276,19 @@
   }
   .mt-times input[type=time]:focus { outline:none; border-color:var(--accent); }
 
+
+  /* Add subject modal form */
+  .add-row { display:flex; flex-direction:column; gap:0.35rem; margin-bottom:0.7rem; }
+  .add-row label {
+    font-size:0.58rem; color:var(--muted);
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .add-row input[type=text] {
+    width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:'DM Mono',monospace; font-size:0.7rem; padding:0.5rem 0.6rem; border-radius:4px;
+  }
+  .add-row input[type=text]:focus { outline:none; border-color:var(--accent); }
+
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
@@ -432,6 +445,30 @@
     <div class="mfoot">
       <button class="btn" onclick="closeTimes()">Cancel</button>
       <button class="btn-save" onclick="saveTimes()">Save Times</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Subject Modal -->
+<div class="overlay" id="add-overlay" onclick="bgClose('add-overlay',event)">
+  <div class="modal">
+    <h2 id="add-title">Add Subject to Day</h2>
+    <div class="modal-section">
+      <h3>Subject + Topic</h3>
+      <form id="add-form" onsubmit="saveAddedSubject(event)">
+        <div class="add-row">
+          <label for="add-subject">Subject</label>
+          <input type="text" id="add-subject" placeholder="e.g. Maths" required>
+        </div>
+        <div class="add-row">
+          <label for="add-topic">Topic</label>
+          <input type="text" id="add-topic" placeholder="e.g. Integration" required>
+        </div>
+        <div class="mfoot">
+          <button class="btn" type="button" onclick="closeAddSubject()">Cancel</button>
+          <button class="btn-save" type="submit">Add Topic</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -761,6 +798,9 @@ let swapA  = null;
 // Log modal state
 let logD = null, logTi = null, logStatus = 0, logMethods = {};
 
+// Add subject modal state
+let addDayIndex = null;
+
 // ════════════════════════════════════════════════════════════════════════════
 //  PROGRESS
 // ════════════════════════════════════════════════════════════════════════════
@@ -1063,7 +1103,12 @@ function resetAll() {
   if(!confirm('Reset all progress, logs and swaps?')) return;
   localStorage.removeItem(SK); location.reload();
 }
-function bgClose(id,e) { if(e.target===document.getElementById(id)) { if(id==='log-overlay') closeLog(); else closeTimes(); } }
+function bgClose(id,e) {
+  if (e.target !== document.getElementById(id)) return;
+  if (id === 'log-overlay') closeLog();
+  else if (id === 'times-overlay') closeTimes();
+  else if (id === 'add-overlay') closeAddSubject();
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 //  INIT
