@@ -774,10 +774,11 @@ function load() { try { return JSON.parse(localStorage.getItem(SK))||{}; } catch
 function save() { localStorage.setItem(SK, JSON.stringify(ST)); }
 
 let ST = load();
-if (!ST.status)   ST.status   = {};   // "d,ti" -> 0|1|2
-if (!ST.times)    ST.times    = {};   // "d,ti" -> {start,end}
-if (!ST.logs)     ST.logs     = {};   // "d,ti" -> {methods:{eq,blurt,flash,flashDone,other}, eqCount, eqPages, otherText}
-if (!ST.tdata)    ST.tdata    = null; // after swaps
+if (!ST || typeof ST !== 'object' || Array.isArray(ST)) ST = {};
+if (!ST.status || typeof ST.status !== 'object' || Array.isArray(ST.status)) ST.status = {}; // "d,ti" -> 0|1|2
+if (!ST.times  || typeof ST.times  !== 'object' || Array.isArray(ST.times))  ST.times  = {}; // "d,ti" -> {start,end}
+if (!ST.logs   || typeof ST.logs   !== 'object' || Array.isArray(ST.logs))   ST.logs   = {}; // "d,ti" -> {methods:{eq,blurt,flash,flashDone,other}, eqCount, eqPages, otherText}
+if (!Array.isArray(ST.tdata)) ST.tdata = null; // after swaps
 if (ST.hideDone === undefined) ST.hideDone = false;
 
 // Restore swapped topic positions
