@@ -1082,31 +1082,22 @@ function toggleHide() {
 function addSubjectToDay(di) {
   const day = PLAN[di];
   if (!day) return;
-  addDayIndex = di;
-  document.getElementById('add-title').textContent = `Add Subject • ${day.day}, ${day.date}`;
-  document.getElementById('add-subject').value = '';
-  document.getElementById('add-topic').value = '';
-  document.getElementById('add-overlay').classList.add('open');
-  document.getElementById('add-subject').focus();
-}
-function saveAddedSubject(event) {
-  event.preventDefault();
-  if (addDayIndex === null) return;
 
-  const cleanSubject = document.getElementById('add-subject').value.trim();
-  const cleanTopic = document.getElementById('add-topic').value.trim();
-  if (!cleanSubject || !cleanTopic) return;
+  const subject = prompt(`Add subject for ${day.day}, ${day.date}:`, 'Maths');
+  if (subject === null) return;
+  const cleanSubject = subject.trim();
+  if (!cleanSubject) return;
 
-  PLAN[addDayIndex].topics.push({ s: cleanSubject, t: cleanTopic });
+  const topic = prompt(`Add topic name for ${cleanSubject}:`, 'New topic');
+  if (topic === null) return;
+  const cleanTopic = topic.trim();
+  if (!cleanTopic) return;
+
+  day.topics.push({ s: cleanSubject, t: cleanTopic });
   tagRepeats();
   persistTopics();
   save();
-  closeAddSubject();
   render();
-}
-function closeAddSubject() {
-  addDayIndex = null;
-  document.getElementById('add-overlay').classList.remove('open');
 }
 function resetAll() {
   if(!confirm('Reset all progress, logs and swaps?')) return;
