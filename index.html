@@ -173,7 +173,47 @@
   .c-appliedm  { background:var(--appliedm-bg);  border-color:rgba(168,255,107,0.12); color:var(--appliedm); }
   .dimmed { opacity:0.07; pointer-events:none; }
 
-  /* ── SWAP BANNER ── */
+  /* ── EXTRA REVISION ITEMS ── */
+  .extra-item { border-style: dashed !important; position: relative; }
+  .extra-label {
+    font-size: 0.42rem; letter-spacing: 0.12em; text-transform: uppercase;
+    opacity: 0.5; margin-bottom: 0.05rem;
+  }
+  .extra-del {
+    position: absolute; top: 3px; right: 3px;
+    background: none; border: none; color: currentColor;
+    font-size: 0.55rem; opacity: 0; cursor: pointer;
+    padding: 2px 4px; border-radius: 2px; line-height: 1;
+    transition: opacity 0.15s;
+  }
+  .extra-item:hover .extra-del { opacity: 0.5; }
+  .extra-del:hover { opacity: 1 !important; background: rgba(255,255,255,0.1); }
+  .add-extra-btn {
+    margin-top: auto;
+    color: var(--accent) !important;
+    border-color: rgba(232,245,78,0.25) !important;
+    font-size: 0.48rem !important;
+  }
+  .add-extra-btn:hover { background: rgba(232,245,78,0.06) !important; border-color: var(--accent) !important; }
+
+  /* ── EXTRA REVISION MODAL ── */
+  .subject-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .spick-subj {
+    padding: 0.38rem 0.7rem; border-radius: 4px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface2);
+    font-size: 0.65rem; color: var(--muted); letter-spacing: 0.05em;
+    transition: all 0.15s; text-transform: uppercase;
+  }
+  .spick-subj:hover { color: var(--text); border-color: var(--muted); }
+  .spick-subj.picked { color: #0d0d0f; font-weight: 700; border-color: transparent; }
+  .spick-subj[data-s="English"].picked        { background: var(--english); }
+  .spick-subj[data-s="Physics"].picked        { background: var(--physics); }
+  .spick-subj[data-s="Biology"].picked        { background: var(--biology); }
+  .spick-subj[data-s="Chemistry"].picked      { background: var(--chemistry); }
+  .spick-subj[data-s="Maths"].picked          { background: var(--maths); color: #fff; }
+  .spick-subj[data-s="Computer Science"].picked { background: var(--cs); }
+  .spick-subj[data-s="Applied Maths"].picked  { background: var(--appliedm); }
+  .spick-subj[data-s="Other"].picked          { background: var(--muted); color: #fff; }
   #swap-banner {
     display:none; position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
     background:#1a1500; border:1px solid var(--wip); color:var(--wip);
@@ -424,6 +464,40 @@
   </div>
 </div>
 
+<!-- Add Extra Revision Modal -->
+<div class="overlay" id="extra-overlay" onclick="bgClose('extra-overlay',event)">
+  <div class="modal">
+    <h2 id="extra-title">Add Extra Revision</h2>
+    <div id="extra-day-label" style="font-size:0.65rem;color:var(--muted);margin-bottom:1.1rem;letter-spacing:0.04em;"></div>
+
+    <div class="modal-section">
+      <h3>Subject</h3>
+      <div class="subject-picker" id="subject-picker">
+        <div class="spick-subj" data-s="English"          onclick="pickExtraSubject('English')">English</div>
+        <div class="spick-subj" data-s="Physics"          onclick="pickExtraSubject('Physics')">Physics</div>
+        <div class="spick-subj" data-s="Biology"          onclick="pickExtraSubject('Biology')">Biology</div>
+        <div class="spick-subj" data-s="Chemistry"        onclick="pickExtraSubject('Chemistry')">Chemistry</div>
+        <div class="spick-subj" data-s="Maths"            onclick="pickExtraSubject('Maths')">Maths</div>
+        <div class="spick-subj" data-s="Computer Science" onclick="pickExtraSubject('Computer Science')">Comp Sci</div>
+        <div class="spick-subj" data-s="Applied Maths"    onclick="pickExtraSubject('Applied Maths')">Applied Maths</div>
+        <div class="spick-subj" data-s="Other"            onclick="pickExtraSubject('Other')">Other</div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>Topic / Chapter</h3>
+      <input type="text" id="extra-topic-input" placeholder="e.g. Quadratics revision, Past paper Q5…"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.72rem;padding:0.5rem 0.7rem;border-radius:5px;outline:none;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
+    <div class="mfoot">
+      <button class="btn" onclick="closeAddExtra()">Cancel</button>
+      <button class="btn-save" onclick="saveAddExtra()">Add to Day</button>
+    </div>
+  </div>
+</div>
+
 <!-- Times Modal -->
 <div class="overlay" id="times-overlay" onclick="bgClose('times-overlay',event)">
   <div class="modal">
@@ -449,6 +523,8 @@ const PLAN = [
   {s:"Applied Maths",  t:"Newtons Laws"},
   {s:"Biology",        t:"Cell division"},
   {s:"Applied Maths",  t:"Optimal Paths"},
+  {s:"Maths",          t:"Quadratics"},                  // missing
+  {s:"Maths",          t:"Inequalities and Modulus"},    // missing
 ]},
 {week:"Week 1",day:"Saturday", date:"February 28, 2026", topics:[
   {s:"English",        t:"Vision and Viewpoint comparative"},
@@ -457,6 +533,8 @@ const PLAN = [
   {s:"Applied Maths",  t:"Circular Motion"},
   {s:"Physics",        t:"Modern Physics"},
   {s:"Applied Maths",  t:"Linear Motion"},
+  {s:"Maths",          t:"Introduction to Geometry"},    // missing
+  {s:"Maths",          t:"Circle Theorems"},             // missing
 ]},
 {week:"Week 1",day:"Sunday",   date:"March 1, 2026", topics:[
   {s:"English",        t:"Paper 2 Unseen Poetry"},
@@ -465,6 +543,8 @@ const PLAN = [
   {s:"Biology",        t:"The Heart"},
   {s:"Biology",        t:"Protista"},
   {s:"Biology",        t:"Characteristics of Life"},
+  {s:"Maths",          t:"Practical Trig"},              // missing
+  {s:"Maths",          t:"Trig Identities and Equations"}, // missing
 ]},
 {week:"Week 1",day:"Monday",   date:"March 2, 2026", topics:[
   {s:"Biology",        t:"Genetic Crosses"},
@@ -473,6 +553,8 @@ const PLAN = [
   {s:"English",        t:"Paper 1 Question B"},
   {s:"Biology",        t:"Cell structure"},
   {s:"Physics",        t:"Sound and Wave Motion"},
+  {s:"Maths",          t:"Lengths areas and volumes"},   // missing
+  {s:"Maths",          t:"Co-ordinate Geometry the Circle"}, // missing
 ]},
 {week:"Week 1",day:"Tuesday",  date:"March 3, 2026", topics:[
   {s:"Maths",          t:"Number Systems"},
@@ -481,6 +563,8 @@ const PLAN = [
   {s:"Biology",        t:"Osmosis/Diffusion"},
   {s:"Physics",        t:"Mechanics 2"},
   {s:"English",        t:"Macbeth Character Profiles"},
+  {s:"Maths",          t:"Applications of differentiation"}, // missing
+  {s:"Maths",          t:"Proof by Induction"},          // missing
 ]},
 {week:"Week 1",day:"Wednesday",date:"March 4, 2026", topics:[
   {s:"Biology",        t:"Fungi"},
@@ -489,6 +573,8 @@ const PLAN = [
   {s:"English",        t:"Seamus Heaney"},
   {s:"Maths",          t:"Trig Ratios and Functions"},
   {s:"Applied Maths",  t:"Differential Equations"},
+  {s:"Maths",          t:"Complex Numbers 2"},           // missing
+  {s:"Maths",          t:"Arrangements and Combinations"}, // missing
 ]},
 {week:"Week 1",day:"Thursday", date:"March 5, 2026", topics:[
   {s:"Maths",          t:"Parallelograms and Triangles"},
@@ -497,6 +583,8 @@ const PLAN = [
   {s:"Physics",        t:"Particle Physics"},
   {s:"Applied Maths",  t:"Difference Equations"},
   {s:"Biology",        t:"Lymphatic System"},
+  {s:"Maths",          t:"Expected Value and Games"},    // missing
+  {s:"Maths",          t:"Introduction to Statistics"},  // missing
 ]},
 
 // ── WEEK 2 ──────────────────────────────────────────────────────────────────
@@ -507,14 +595,18 @@ const PLAN = [
   {s:"Physics",        t:"Light"},
   {s:"English",        t:"Eilean Ni Chuillinean"},
   {s:"Applied Maths",  t:"Vectors"},
+  {s:"Maths",          t:"Correlation"},                 // missing
+  {s:"Computer Science",t:"History of Computing"},      // missing
 ]},
 {week:"Week 2",day:"Saturday", date:"March 7, 2026", topics:[
   {s:"Biology",        t:"Enzymes"},
-  {s:"English",        t:"Cultural Context - Gender Roles and Expectations"},
+  {s:"English",        t:"Cultural Context Comparative - Gender Roles and Expectations"},
   {s:"Physics",        t:"Heat and Temperature"},
   {s:"Applied Maths",  t:"Collisions"},
   {s:"Applied Maths",  t:"Work Energy Power"},
   {s:"Maths",          t:"Enlargements"},
+  {s:"Computer Science",t:"Embedded Systems"},          // missing
+  {s:"Computer Science",t:"Databases"},                 // missing
 ]},
 {week:"Week 2",day:"Sunday",   date:"March 8, 2026", topics:[
   {s:"English",        t:"Paper 1 Composition"},
@@ -523,6 +615,8 @@ const PLAN = [
   {s:"Computer Science",t:"Computer Systems"},
   {s:"Maths",          t:"Arithmetic and Money"},
   {s:"Maths",          t:"Integration"},
+  {s:"Computer Science",t:"Modelling"},                 // missing
+  {s:"Computer Science",t:"Decomposition and Abstractions"}, // missing
 ]},
 {week:"Week 2",day:"Monday",   date:"March 9, 2026", topics:[
   {s:"English",        t:"Elisabeth Bishop"},
@@ -531,6 +625,7 @@ const PLAN = [
   {s:"Physics",        t:"Modern Physics"},
   {s:"Biology",        t:"Human Digestion"},
   {s:"Computer Science",t:"ML and AI"},
+  {s:"Computer Science",t:"Algorithms"},               // missing
 ]},
 {week:"Week 2",day:"Tuesday",  date:"March 10, 2026", topics:[
   {s:"Chemistry",      t:"Condensation reactions, Saponification reaction"},
@@ -539,22 +634,25 @@ const PLAN = [
   {s:"English",        t:"Paper 1 Question A"},
   {s:"Physics",        t:"Sound and Wave Motion"},
   {s:"Chemistry",      t:"Benzene and Steam Distillation"},
+  {s:"Chemistry",      t:"History"},                   // missing
 ]},
 {week:"Week 2",day:"Wednesday",date:"March 11, 2026", topics:[
-  {s:"English",        t:"Cultural Context - Power Structures, wealth and poverty"},
-  {s:"Chemistry",      t:"Mechanisms of Free Radical Substitution, Ionic Addition and Polymerisation"},
+  {s:"English",        t:"Cultural Context Comparative - Power Structures, wealth and poverty"},
+  {s:"Chemistry",      t:"Mechanisms of Free radicle Substitution, Ionic Addition and Polymerisation"},
   {s:"Physics",        t:"Mechanics 1"},
   {s:"Maths",          t:"Introduction to Probability"},
   {s:"Maths",          t:"Financial Maths"},
   {s:"Chemistry",      t:"Stoichiometry 4"},
+  {s:"Chemistry",      t:"Stoichiometry 1"},           // missing
 ]},
 {week:"Week 2",day:"Thursday", date:"March 12, 2026", topics:[
   {s:"Biology",        t:"Monera"},
   {s:"Physics",        t:"Mechanics 2"},
   {s:"Maths",          t:"Normal Distributions"},
   {s:"English",        t:"Macbeth Dramatic Techniques"},
-  {s:"Chemistry",      t:"Elimination reaction, oxidation and reduction reactions"},
+  {s:"Chemistry",      t:"Elimination reaction, oxidation and reduction reactions, reactions of acids"},
   {s:"Biology",        t:"Respiration"},
+  {s:"Chemistry",      t:"Gas Laws"},                  // missing
 ]},
 
 // ── WEEK 3 ──────────────────────────────────────────────────────────────────
@@ -565,6 +663,7 @@ const PLAN = [
   {s:"Maths",          t:"Sequences and Series"},
   {s:"Physics",        t:"Particle Physics"},
   {s:"Biology",        t:"Structure of a Plant"},
+  {s:"Chemistry",      t:"Environmental chemistry"},   // missing
 ]},
 {week:"Week 3",day:"Saturday", date:"March 14, 2026", topics:[
   {s:"Maths",          t:"Linear Equations and Functions"},
@@ -573,6 +672,7 @@ const PLAN = [
   {s:"Computer Science",t:"Python Testing Theory"},
   {s:"Biology",        t:"Viruses"},
   {s:"Computer Science",t:"Software Development"},
+  {s:"Chemistry",      t:"Test for Anions"},           // missing
 ]},
 {week:"Week 3",day:"Sunday",   date:"March 15, 2026", topics:[
   {s:"Physics",        t:"Light"},
@@ -618,7 +718,7 @@ const PLAN = [
 // ── WEEK 4 ──────────────────────────────────────────────────────────────────
 {week:"Week 4",day:"Friday",   date:"March 20, 2026", topics:[
   {s:"Chemistry",      t:"Stoichiometry 3"},
-  {s:"Chemistry",      t:"Aldehydes, Ketones, Carboxylic Acids and Esters"},
+  {s:"Chemistry",      t:"Aldehydes, Ketones, Carboxylic Acids and Esters, Reactions of Ethanal and Ethanoic Acid"},
   {s:"English",        t:"Paper 1 Question A"},
   {s:"Maths",          t:"Intro to differentiation"},
   {s:"Computer Science",t:"Recursion"},
@@ -643,7 +743,7 @@ const PLAN = [
 {week:"Week 4",day:"Monday",   date:"March 23, 2026", topics:[
   {s:"Chemistry",      t:"Ionisation Energy"},
   {s:"Chemistry",      t:"Preparation of Benzoic acid"},
-  {s:"English",        t:"Cultural Context - Gender Roles and Expectations"},
+  {s:"English",        t:"Cultural Context Comparative - Gender Roles and Expectations"},
   {s:"Physics",        t:"Heat and Temperature"},
   {s:"Maths",          t:"Functions"},
   {s:"Maths",          t:"Trig Graphs"},
@@ -702,6 +802,7 @@ if (!ST.status)   ST.status   = {};   // "d,ti" -> 0|1|2
 if (!ST.times)    ST.times    = {};   // "d,ti" -> {start,end}
 if (!ST.logs)     ST.logs     = {};   // "d,ti" -> {methods:{eq,blurt,flash,flashDone,other}, eqCount, eqPages, otherText}
 if (!ST.tdata)    ST.tdata    = null; // after swaps
+if (!ST.extras)   ST.extras   = {};   // "d" -> [{id, subject, topic, status, log}]
 if (ST.hideDone === undefined) ST.hideDone = false;
 
 // Restore swapped topic positions
@@ -714,6 +815,7 @@ if (ST.tdata) {
 function getStatus(d,ti) { return ST.status[`${d},${ti}`] || 0; }
 function getTime(d,ti)   { return ST.times[`${d},${ti}`]  || {start:'',end:''}; }
 function getLog(d,ti)    { return ST.logs[`${d},${ti}`]   || {methods:{},eqCount:'',eqPages:'',otherText:''}; }
+function getExtras(d)    { return ST.extras[d] || []; }
 function today() { return new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -731,9 +833,15 @@ let logD = null, logTi = null, logStatus = 0, logMethods = {};
 //  PROGRESS
 // ════════════════════════════════════════════════════════════════════════════
 function updateProgress() {
-  const total = PLAN.reduce((s,d) => s + d.topics.length, 0);
+  const planTotal = PLAN.reduce((s,d) => s + d.topics.length, 0);
+  const extraTotal = Object.values(ST.extras).reduce((s,arr) => s + arr.length, 0);
+  const total = planTotal + extraTotal;
   let done = 0, wip = 0;
   Object.values(ST.status).forEach(v => { if(v===2) done++; else if(v===1) wip++; });
+  // Count extras statuses
+  Object.values(ST.extras).forEach(arr => arr.forEach(ex => {
+    if(ex.status===2) done++; else if(ex.status===1) wip++;
+  }));
   const dp = total ? done/total*100 : 0, wp = total ? wip/total*100 : 0;
   document.getElementById('pb-done').style.width = dp + '%';
   document.getElementById('pb-wip').style.width  = wp + '%';
@@ -824,6 +932,38 @@ function render() {
         card.appendChild(item);
       });
 
+      // ── EXTRA REVISION ITEMS ──
+      const extras = getExtras(di);
+      extras.forEach((ex, ei) => {
+        if (ST.hideDone && ex.status === 2) return;
+        const exBadges = extraLogBadges(ex.log || {});
+        const badgeStr = exBadges.length ? `<div class="tlog">${exBadges.map(b=>`<span class="tlog-badge">${b}</span>`).join('')}</div>` : '';
+        const exItem = document.createElement('div');
+        exItem.className = [
+          sc(ex.subject),
+          ex.status===1?'s-wip':'',
+          ex.status===2?'s-done':'',
+          filter !== 'all' && ex.subject !== filter ? 'dimmed' : '',
+          'topic-item extra-item'
+        ].filter(Boolean).join(' ');
+        exItem.innerHTML = `
+          <div class="sdot"></div>
+          <div class="extra-label">✦ extra</div>
+          <div class="ts">${ex.subject}</div>
+          <div class="tn">${ex.topic}</div>
+          ${badgeStr}
+          <button class="extra-del" title="Delete" onclick="deleteExtra(event,${di},${ei})">✕</button>`;
+        exItem.onclick = e => { if(!e.target.classList.contains('extra-del')) { e.stopPropagation(); openExtraLog(di, ei); } };
+        card.appendChild(exItem);
+      });
+
+      // Add extra button
+      const addBtn = document.createElement('button');
+      addBtn.className = 'day-btn add-extra-btn';
+      addBtn.textContent = '+ extra revision';
+      addBtn.onclick = e => { e.stopPropagation(); openAddExtra(di); };
+      card.appendChild(addBtn);
+
       grid.appendChild(card);
     });
 
@@ -832,6 +972,93 @@ function render() {
   });
 
   updateProgress();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  EXTRA REVISION
+// ════════════════════════════════════════════════════════════════════════════
+let extraDayIdx = null;
+let extraSubject = '';
+
+function extraLogBadges(lg) {
+  // Same badge logic as regular topics
+  const badges = [];
+  if (lg.methods?.eq)        badges.push(`📝 ${lg.eqCount||'?'} Q${lg.eqPages?' ('+lg.eqPages+')':''}`);
+  if (lg.methods?.blurt)     badges.push('✍️ Blurt');
+  if (lg.methods?.flash)     badges.push('🃏 Made cards');
+  if (lg.methods?.flashDone) badges.push('✅ Done cards');
+  if (lg.methods?.other && lg.otherText) badges.push('💬 ' + lg.otherText.slice(0,20));
+  else if (lg.methods?.other) badges.push('💬 Other');
+  return badges;
+}
+
+function openAddExtra(di) {
+  extraDayIdx = di;
+  extraSubject = '';
+  const day = PLAN[di];
+  document.getElementById('extra-title').textContent = 'Add Extra Revision';
+  document.getElementById('extra-day-label').textContent = `📅 ${day.day}, ${day.date}`;
+  document.getElementById('extra-topic-input').value = '';
+  // Reset subject picker
+  document.querySelectorAll('.spick-subj').forEach(el => el.classList.remove('picked'));
+  document.getElementById('extra-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('extra-topic-input').focus(), 100);
+}
+
+function pickExtraSubject(s) {
+  extraSubject = s;
+  document.querySelectorAll('.spick-subj').forEach(el => el.classList.toggle('picked', el.dataset.s === s));
+}
+
+function saveAddExtra() {
+  const topic = document.getElementById('extra-topic-input').value.trim();
+  if (!topic) { document.getElementById('extra-topic-input').style.borderColor='var(--wip)'; return; }
+  if (!extraSubject) { document.querySelectorAll('.spick-subj').forEach(el => el.style.outline='1px solid var(--wip)'); return; }
+  document.querySelectorAll('.spick-subj').forEach(el => el.style.outline='');
+  if (!ST.extras[extraDayIdx]) ST.extras[extraDayIdx] = [];
+  ST.extras[extraDayIdx].push({ id: Date.now(), subject: extraSubject, topic, status: 0, log: {} });
+  save();
+  closeAddExtra();
+  render();
+}
+
+function closeAddExtra() {
+  document.getElementById('extra-overlay').classList.remove('open');
+}
+
+function deleteExtra(e, di, ei) {
+  e.stopPropagation();
+  if (!confirm('Remove this extra revision item?')) return;
+  ST.extras[di].splice(ei, 1);
+  save(); render();
+}
+
+// Open study log for an extra item
+function openExtraLog(di, ei) {
+  const ex = ST.extras[di][ei];
+  logD = di; logTi = `x${ei}`;  // 'x' prefix marks it as extra
+  logStatus = ex.status || 0;
+  logMethods = { ...(ex.log?.methods || {}) };
+
+  const hdr = document.getElementById('log-topic-header');
+  hdr.className = 'log-topic-header ' + sc(ex.subject);
+  hdr.innerHTML = `<div><div class="log-subj">${ex.subject} <span style="opacity:0.5;font-size:0.85em">✦ extra</span></div><div class="log-name">${ex.topic}</div></div>`;
+  document.getElementById('log-title').textContent = 'Study Log';
+  refreshStatusPicker();
+
+  ['eq','blurt','flash','flash-done','other'].forEach(m => {
+    const key = m === 'flash-done' ? 'flashDone' : m;
+    const isOn = !!logMethods[key];
+    document.getElementById(`mrow-${m}`).classList.toggle('checked', isOn);
+    document.getElementById(`mc-${m}`).textContent = isOn ? '✓' : '';
+  });
+  document.getElementById('eq-count').value = ex.log?.eqCount || '';
+  document.getElementById('eq-pages').value  = ex.log?.eqPages || '';
+  document.getElementById('eq-count-row').style.display = logMethods.eq ? 'flex' : 'none';
+  document.getElementById('other-text').value = ex.log?.otherText || '';
+  document.getElementById('other-text-row').style.display = logMethods.other ? 'flex' : 'none';
+
+  document.getElementById('log-overlay').classList.add('open');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -891,14 +1118,25 @@ function toggleMethod(m) {
 }
 
 function saveLog() {
-  const k = `${logD},${logTi}`;
-  ST.status[k] = logStatus;
-  ST.logs[k] = {
+  const logData = {
     methods:   { ...logMethods },
     eqCount:   document.getElementById('eq-count').value,
     eqPages:   document.getElementById('eq-pages').value,
     otherText: document.getElementById('other-text').value,
   };
+
+  // Check if this is an extra item (logTi is like 'x0', 'x1' etc)
+  if (typeof logTi === 'string' && logTi.startsWith('x')) {
+    const ei = parseInt(logTi.slice(1));
+    if (ST.extras[logD] && ST.extras[logD][ei]) {
+      ST.extras[logD][ei].status = logStatus;
+      ST.extras[logD][ei].log = logData;
+    }
+  } else {
+    const k = `${logD},${logTi}`;
+    ST.status[k] = logStatus;
+    ST.logs[k] = logData;
+  }
   save(); closeLog(); render();
 }
 
@@ -1001,7 +1239,7 @@ function resetAll() {
   if(!confirm('Reset all progress, logs and swaps?')) return;
   localStorage.removeItem(SK); location.reload();
 }
-function bgClose(id,e) { if(e.target===document.getElementById(id)) { if(id==='log-overlay') closeLog(); else closeTimes(); } }
+function bgClose(id,e) { if(e.target===document.getElementById(id)) { if(id==='log-overlay') closeLog(); else if(id==='extra-overlay') closeAddExtra(); else closeTimes(); } }
 
 // ════════════════════════════════════════════════════════════════════════════
 //  INIT
