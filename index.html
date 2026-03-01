@@ -470,6 +470,12 @@
           <input type="text" id="add-topic" placeholder="e.g. Integration">
         </div>
         <div class="add-error" id="add-error"></div>
+          <input type="text" id="add-subject" placeholder="e.g. Maths" required>
+        </div>
+        <div class="add-row">
+          <label for="add-topic">Topic</label>
+          <input type="text" id="add-topic" placeholder="e.g. Integration" required>
+        </div>
         <div class="mfoot">
           <button class="btn" type="button" onclick="closeAddSubject()">Cancel</button>
           <button class="btn-save" type="submit">Add Topic</button>
@@ -1123,6 +1129,23 @@ function closeAddSubject() {
   addDayIndex = null;
   document.getElementById('add-overlay').classList.remove('open');
   document.getElementById('add-error').classList.remove('on');
+}
+
+  const subject = prompt(`Add subject for ${day.day}, ${day.date}:`, 'Maths');
+  if (subject === null) return;
+  const cleanSubject = subject.trim();
+  if (!cleanSubject) return;
+
+  const topic = prompt(`Add topic name for ${cleanSubject}:`, 'New topic');
+  if (topic === null) return;
+  const cleanTopic = topic.trim();
+  if (!cleanTopic) return;
+
+  day.topics.push({ s: cleanSubject, t: cleanTopic });
+  tagRepeats();
+  persistTopics();
+  save();
+  render();
 }
 function resetAll() {
   if(!confirm('Reset all progress, logs and swaps?')) return;
